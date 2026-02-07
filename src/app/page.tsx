@@ -16,6 +16,7 @@ export default async function Home() {
     .from('games')
     .select('*')
     .order('title', { ascending: true });
+    
 
   return (
     <main className="min-h-screen bg-[#0a0514] selection:bg-purple-500/30">
