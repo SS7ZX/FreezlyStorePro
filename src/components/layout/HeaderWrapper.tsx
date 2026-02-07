@@ -33,8 +33,8 @@ export default function HeaderWrapper() {
         user={user}
         onLogout={handleLogout}
         currentView="HOME"
-        onNavigate={(view) => console.log("Navigate to:", view)} // Logika navigasi nanti
-        onSearch={(query) => console.log("Search:", query)}      // Logika search nanti
+        onNavigate={(view: string) => console.log("Navigate to:", view)} // Logika navigasi nanti
+        onSearch={(query: string) => console.log("Search:", query)}      // Logika search nanti
       />
 
       {/* Modal Login dipasang disini agar bisa dikontrol state-nya */}

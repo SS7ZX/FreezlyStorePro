@@ -1,7 +1,15 @@
 'use client';
+'use client';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Loader2, Check, Server, ShieldCheck } from 'lucide-react';
+import { Loader2, Check, Server, ShieldCheck, LucideIcon } from 'lucide-react';
+
+interface StepItemProps {
+  active: boolean;
+  completed: boolean;
+  text: string;
+  icon: LucideIcon;
+}
 
 export default function OrderTracker({ onComplete }: { onComplete: () => void }) {
   const [step, setStep] = useState(1);
@@ -24,7 +32,7 @@ export default function OrderTracker({ onComplete }: { onComplete: () => void })
   );
 }
 
-function StepItem({ active, completed, text, icon: Icon }: any) {
+function StepItem({ active, completed, text, icon: Icon }: StepItemProps) {
   return (
     <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: active ? 1 : 0.3, x: 0 }}
       className={`flex items-center gap-4 p-4 rounded-xl border ${active ? 'bg-purple-500/10 border-purple-500/30' : 'bg-white/5 border-white/5'}`}>

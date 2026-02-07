@@ -1,85 +1,59 @@
-import { supabase } from '@/lib/supabaseClient';
-import Link from 'next/link';
-import Footer from '@/components/layout/Footer';
+'use client';
+
 import Hero from '@/components/features/Hero';
 import EventCarousel from '@/components/features/EventCarousel';
-import Features from '@/components/features/Features';
-import FloatingWidget from '@/components/features/FloatingWidget';
-import HeaderWrapper from '@/components/layout/HeaderWrapper'; // <--- IMPORT BARU
+import Features from '@/components/features/Features'; // Pastikan export default di file aslinya
+import GameCard from '@/components/ui/GameCard';
+import { motion } from 'framer-motion';
 
-// Agar data selalu fresh
-export const revalidate = 0;
+// Mock Data Game (Bisa ambil dari src/data/games.ts)
+const GAMES = [
+  { id: 'mlbb', name: 'Mobile Legends', publisher: 'Moonton', image: '/mlbb.jpg', isPopular: true },
+  { id: 'pubg', name: 'PUBG Mobile', publisher: 'Tencent', image: '/pubg.jpg', isPopular: true },
+  { id: 'ff', name: 'Free Fire', publisher: 'Garena', image: '/ff.jpg', isPopular: false },
+  { id: 'genshin', name: 'Genshin Impact', publisher: 'HoYoverse', image: '/genshin.jpg', isPopular: true },
+  { id: 'valorant', name: 'Valorant', publisher: 'Riot Games', image: '/val.jpg', isPopular: false },
+];
 
-export default async function Home() {
-  // 1. Ambil List Game dari Supabase
-  const { data: games } = await supabase
-    .from('games')
-    .select('*')
-    .order('title', { ascending: true });
-    
-
+export default function HomePage() {
   return (
-    <main className="min-h-screen bg-[#0a0514] selection:bg-purple-500/30">
-      
-      {/* --- BAGIAN YANG DIPERBAIKI --- */}
-      {/* Kita ganti Navbar dengan HeaderWrapper yang aman */}
-      <HeaderWrapper /> 
-      {/* ----------------------------- */}
-
-      {/* HERO SECTION */}
+    <div className="space-y-16">
+      {/* 1. HERO SECTION */}
       <Hero />
+      
+      {/* 2. PROMO CAROUSEL */}
+      <section className="container mx-auto px-4 relative z-10">
+         <div className="mb-6 flex items-center gap-3">
+            <div className="h-8 w-1 bg-purple-500 rounded-full"/>
+            <h2 className="text-2xl font-black italic">EVENT & PROMO</h2>
+         </div>
+         <EventCarousel />
+      </section>
 
-      {/* CAROUSEL EVENT */}
-      <div className="my-10">
-        <EventCarousel />
-      </div>
+      {/* 3. GAME LIST GRID */}
+      <section className="container mx-auto px-4" id="games">
+         <div className="mb-8 text-center max-w-2xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-black text-white mb-2">PILIH <span className="text-purple-500">GAME</span></h2>
+            <p className="text-gray-400">Top up game favoritmu dalam hitungan detik.</p>
+         </div>
 
-      {/* FITUR */}
-      <Features />
-
-      {/* LIST GAME */}
-      <div id="games" className="container mx-auto px-6 py-20">
-        <div className="flex items-center gap-4 mb-10">
-           <div className="h-10 w-2 bg-purple-600 rounded-full" />
-           <h2 className="text-3xl md:text-4xl font-black italic text-white tracking-tighter">
-             PILIH GAME
-           </h2>
-        </div>
-
-        {/* Grid Game */}
-        {games && games.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-            {games.map((game) => (
-              <Link key={game.id} href={`/game/${game.slug}`} className="group relative">
-                <div className="relative aspect-[3/4] overflow-hidden rounded-2xl border border-white/10 bg-[#130d21] group-hover:border-purple-500/50 transition-all duration-300 shadow-xl group-hover:shadow-purple-500/20 group-hover:-translate-y-2">
-                  <img 
-                    src={game.thumbnail_url} 
-                    alt={game.title} 
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-60 transition-opacity" />
-                  <div className="absolute bottom-0 left-0 w-full p-4 text-center">
-                    <h3 className="text-white font-bold text-sm md:text-base leading-tight group-hover:text-purple-300 transition-colors">
-                      {game.title}
-                    </h3>
-                    <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-wider">
-                      {game.publisher}
-                    </p>
-                  </div>
-                </div>
-              </Link>
+         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+            {GAMES.map((game, index) => (
+                <motion.div
+                    key={game.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.05 }}
+                >
+                    <GameCard game={game} />
+                </motion.div>
             ))}
-          </div>
-        ) : (
-          <div className="text-center py-20 bg-white/5 rounded-3xl border border-dashed border-white/10">
-            <p className="text-gray-400 mb-4">Belum ada game tersedia.</p>
-            <p className="text-xs text-gray-600">Pastikan database Supabase sudah diisi.</p>
-          </div>
-        )}
-      </div>
+         </div>
+      </section>
 
-      <Footer />
-      <FloatingWidget />
-    </main>
+      {/* 4. FEATURES & TRUST */}
+      <Features />
+    </div>
   );
 }

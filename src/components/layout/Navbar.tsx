@@ -1,146 +1,127 @@
 'use client';
 
-import { Search, LogOut, User, Gamepad2, Trophy, Calculator, FileText, CreditCard, Settings, } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { Gamepad2, Search, Trophy, Menu, X, LogIn, User } from 'lucide-react';
 
-// Props Interface tetap sama...
+const NAV_LINKS = [
+  { name: 'Beranda', href: '/', icon: Gamepad2 },
+  { name: 'Lacak Pesanan', href: '/track', icon: Search },
+  { name: 'Top Sultan', href: '/leaderboard', icon: Trophy },
+];
+
 interface NavbarProps {
-  onOpenAuth: (view: 'LOGIN' | 'REGISTER') => void;
-  user: { name: string; email: string } | null;
-  onLogout: () => void;
-  currentView: string;
-  onNavigate: (view: string) => void;
-  onSearch: (query: string) => void;
+  onOpenAuth?: (view: 'LOGIN' | 'REGISTER') => void;
+  user?: { name: string; email: string } | null;
+  onLogout?: () => void;
+  currentView?: string;
+  onNavigate?: (view: string) => void;
+  onSearch?: (query: string) => void;
 }
 
-export default function Navbar({ onOpenAuth, user, onLogout, currentView, onNavigate, onSearch }: NavbarProps) {
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
+export default function Navbar({
+  onOpenAuth,
+  user,
+  onLogout,
+  currentView,
+  onNavigate,
+  onSearch,
+}: NavbarProps) {
+  const pathname = usePathname();
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <div className="sticky top-0 z-50 w-full">
-      <div className="bg-[#0a0514]/80 backdrop-blur-xl border-b border-white/10 px-4 md:px-6 py-4 flex items-center justify-between shadow-[0_4px_30px_rgba(139,92,246,0.1)]">
-        
-        {/* LOGO with Neon Effect */}
-        <motion.div 
-          whileHover={{ scale: 1.05 }}
-          onClick={() => onNavigate('HOME')} 
-          className="flex items-center gap-2 cursor-pointer group"
-        >
-          <div className="relative">
-            <div className="absolute inset-0 bg-purple-500 blur-lg opacity-40 group-hover:opacity-100 transition-opacity" />
-            <img src="https://cdn-icons-png.flaticon.com/512/3408/3408506.png" alt="Logo" className="w-8 md:w-10 h-8 md:h-10 relative z-10" />
-          </div>
-          <span className="text-xl md:text-2xl font-black tracking-tighter text-white italic">
-            FREEZLY<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">STORE</span>
-          </span>
-        </motion.div>
-
-        {/* Search Bar - Modern Glow */}
-        <div className="hidden md:flex flex-1 max-w-xl mx-12 relative group">
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-cyan-600 rounded-full opacity-30 group-focus-within:opacity-100 transition duration-500 blur"></div>
-          <div className="relative w-full">
-            <input 
-              type="text" 
-              placeholder="Search games, vouchers..." 
-              onChange={(e) => onSearch(e.target.value)}
-              className="w-full bg-[#130d21] text-gray-200 pl-12 pr-4 py-2.5 rounded-full border border-white/5 focus:outline-none placeholder:text-gray-500 text-sm"
-            />
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 group-focus-within:text-purple-400 transition-colors" />
-          </div>
-        </div>
-
-        {/* User Actions */}
-        <div className="flex items-center gap-4 md:gap-6">
+    <>
+      <nav className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 border-b ${
+        isScrolled 
+          ? 'bg-[#0a0514]/80 backdrop-blur-xl border-white/10 py-4 shadow-lg' 
+          : 'bg-transparent border-transparent py-6'
+      }`}>
+        <div className="container mx-auto px-4 flex items-center justify-between">
           
-          {user ? (
-            <div className="relative">
-              <motion.button 
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className="flex items-center gap-3 bg-[#1A1A20] hover:bg-[#25252d] border border-white/10 hover:border-purple-500/50 pl-2 pr-4 py-1.5 rounded-full transition-all shadow-lg shadow-purple-900/20"
-              >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-500 to-cyan-500 flex items-center justify-center text-white font-bold text-sm shadow-inner">
-                  {user.name.charAt(0).toUpperCase()}
-                </div>
-                <div className="text-left hidden md:block">
-                  <p className="text-[10px] text-gray-400 uppercase tracking-wider">Member</p>
-                  <p className="text-xs font-bold text-white leading-none truncate max-w-[80px]">{user.name.split(' ')[0]}</p>
-                </div>
-              </motion.button>
-              
-              {/* Dropdown Menu */}
-              <AnimatePresence>
-                {isProfileOpen && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 15, scale: 0.95 }} 
-                    animate={{ opacity: 1, y: 0, scale: 1 }} 
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="absolute right-0 mt-3 w-60 bg-[#130d21]/95 backdrop-blur-xl border border-purple-500/30 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] overflow-hidden py-2 z-50"
-                  >
-                    <div className="px-5 py-3 border-b border-white/5 bg-purple-500/5">
-                        <p className="text-purple-300 font-bold text-sm">{user.name}</p>
-                        <p className="text-xs text-gray-400">{user.email}</p>
-                    </div>
-                    {/* Menu Items */}
-                    <div className="p-2 space-y-1">
-                        <MenuItem icon={<User size={16} />} label="My Profile" />
-                        <MenuItem icon={<FileText size={16} />} label="History" onClick={() => { onNavigate('HISTORY'); setIsProfileOpen(false); }} />
-                        <MenuItem icon={<Settings size={16} />} label="Settings" />
-                        <button onClick={onLogout} className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-lg flex items-center gap-3 transition-colors font-bold mt-2">
-                           <LogOut size={16} /> Logout
-                        </button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+          {/* LOGO */}
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="relative w-10 h-10 flex items-center justify-center bg-gradient-to-br from-purple-600 to-indigo-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform">
+              <Gamepad2 className="text-white relative z-10" size={20} />
             </div>
-          ) : (
-            <div className="flex gap-3">
-              <button onClick={() => onOpenAuth('LOGIN')} className="text-white text-sm font-bold px-3 py-2 hover:text-purple-400 transition-colors">Login</button>
-              <motion.button 
-                whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                onClick={() => onOpenAuth('REGISTER')}
-                className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-sm font-bold px-5 py-2 rounded-full shadow-[0_0_20px_rgba(124,58,237,0.4)] border border-white/10 hover:shadow-[0_0_30px_rgba(124,58,237,0.6)] transition-all"
-              >
-                Sign Up
-              </motion.button>
+            <div>
+              <span className="block text-lg font-black text-white leading-none">FREEZYLE</span>
+              <span className="text-[10px] font-bold text-purple-400 tracking-widest">STORE PRO</span>
             </div>
-          )}
-        </div>
-      </div>
+          </Link>
 
-      {/* NAV LINKS (Glowing Active State) */}
-      <div className="bg-[#05020a]/80 backdrop-blur-md border-b border-white/5">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="flex items-center gap-8 py-3 overflow-x-auto no-scrollbar">
-            <NavItem icon={<Gamepad2 size={18} />} label="Top Up" active={currentView === 'HOME'} onClick={() => onNavigate('HOME')} />
-            <NavItem icon={<CreditCard size={18} />} label="Check Order" active={currentView === 'HISTORY'} onClick={() => onNavigate('HISTORY')} />
-            <NavItem icon={<Trophy size={18} />} label="Leaderboard" active={currentView === 'LEADERBOARD'} onClick={() => onNavigate('LEADERBOARD')} />
-            <NavItem icon={<Calculator size={18} />} label="WR Calc" active={currentView === 'CALCULATOR'} onClick={() => onNavigate('CALCULATOR')} />
+          {/* DESKTOP MENU */}
+          <div className="hidden md:flex items-center bg-white/5 border border-white/5 rounded-full p-1.5 backdrop-blur-md">
+            {NAV_LINKS.map((link) => {
+              const isActive = pathname === link.href;
+              return (
+                <Link key={link.href} href={link.href} className={`relative px-5 py-2 rounded-full text-sm font-bold transition-all flex items-center gap-2 ${isActive ? 'text-white' : 'text-gray-400 hover:text-white'}`}>
+                  {isActive && (
+                    <motion.div layoutId="nav-pill" className="absolute inset-0 bg-purple-600 rounded-full shadow-lg" transition={{ type: "spring", bounce: 0.2, duration: 0.6 }} />
+                  )}
+                  <span className="relative z-10 flex items-center gap-2">
+                    <link.icon size={16} /> {link.name}
+                  </span>
+                </Link>
+              );
+            })}
           </div>
+
+          {/* AUTH BUTTONS */}
+          <div className="hidden md:flex items-center gap-3">
+             {user ? (
+               <>
+                 <span className="text-sm text-gray-300">{user.name}</span>
+                 <button onClick={onLogout} className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-black transition-all flex items-center gap-2">
+                   <User size={18} /> Keluar
+                 </button>
+               </>
+             ) : (
+               <>
+                 <button onClick={() => onOpenAuth?.('LOGIN')} className="px-5 py-2.5 rounded-xl bg-white text-black text-sm font-black hover:bg-gray-200 transition-all flex items-center gap-2">
+                    <User size={18} /> Masuk
+                 </button>
+                 <button onClick={() => onOpenAuth?.('REGISTER')} className="px-5 py-2.5 rounded-xl bg-purple-600 text-white text-sm font-black hover:bg-purple-700 transition-all">
+                    Daftar
+                 </button>
+               </>
+             )}
+          </div>
+
+          {/* MOBILE TOGGLE */}
+          <button className="md:hidden p-2 text-white" onClick={() => setIsMobileMenuOpen(true)}>
+            <Menu size={24} />
+          </button>
         </div>
-      </div>
-    </div>
-  );
-}
+      </nav>
 
-function NavItem({ icon, label, active, onClick }: { icon: any, label: string, active: boolean, onClick: () => void }) {
-  return (
-    <div onClick={onClick} className={`relative flex items-center gap-2 cursor-pointer pb-2 transition-all duration-300 group`}>
-      <span className={`transition-colors ${active ? 'text-purple-400' : 'text-gray-400 group-hover:text-white'}`}>{icon}</span>
-      <span className={`font-bold text-xs md:text-sm uppercase tracking-wider ${active ? 'text-white' : 'text-gray-400 group-hover:text-white'}`}>{label}</span>
-      {active && (
-        <motion.div layoutId="nav-underline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-500 to-cyan-500 shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
-      )}
-    </div>
-  );
-}
-
-function MenuItem({ icon, label, onClick }: { icon: any, label: string, onClick?: () => void }) {
-  return (
-    <button onClick={onClick} className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-purple-500/10 rounded-lg flex items-center gap-3 transition-colors font-medium">
-      {icon} {label}
-    </button>
+      {/* MOBILE DRAWER */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} className="fixed inset-y-0 right-0 w-[80%] bg-[#0f0818] border-l border-white/10 z-[60] p-6 flex flex-col md:hidden">
+             <div className="flex justify-between items-center mb-8">
+                <h3 className="font-black text-white">MENU</h3>
+                <button onClick={() => setIsMobileMenuOpen(false)}><X className="text-gray-400"/></button>
+             </div>
+             <div className="space-y-2">
+                {NAV_LINKS.map((link) => (
+                  <Link key={link.href} href={link.href} onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 p-4 rounded-xl border ${pathname === link.href ? 'bg-purple-600/20 border-purple-500/50 text-purple-400' : 'bg-white/5 border-transparent text-gray-400'}`}>
+                    <link.icon size={20} /> <span className="font-bold">{link.name}</span>
+                  </Link>
+                ))}
+             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
